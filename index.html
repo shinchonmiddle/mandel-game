@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>가계도 탐정 - 유전자형 추론</title>
+<style>
+:root{--bg:#f7f8fb;--card:#fff;--text:#1f2937;--muted:#6b7280;--line:#d1d5db;--accent:#2563eb;--good:#15803d;--good-soft:#dcfce7;--bad:#b91c1c;--bad-soft:#fee2e2;--fill:#64748b}
+*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{width:min(980px,100%);margin:0 auto;padding:18px}header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}.eyebrow{font-size:17px;color:var(--muted);font-weight:800}h1{font-size:clamp(36px,5vw,52px);margin:4px 0 6px}.sub{color:var(--muted);font-size:20px}.status{display:flex;gap:8px;flex-wrap:wrap}.pill{padding:9px 13px;border:1px solid var(--line);border-radius:13px;background:#fff;font-weight:700}.progress{height:9px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-bottom:15px}.progress>div{height:100%;background:var(--accent);width:0;transition:.25s}.panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 22px rgba(17,24,39,.05)}.stage-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.level{font-size:17px;color:var(--muted);font-weight:800;letter-spacing:.03em}h2{font-size:32px;margin:4px 0 6px}.mission{color:var(--muted);font-size:20px}.visual{margin:16px 0;background:#fafafa;border:1px solid #e5e7eb;border-radius:16px;padding:12px;overflow-x:auto}.legend{font-size:18px;font-weight:700;margin-bottom:8px}.question{font-size:26px;font-weight:800;line-height:1.45;margin:12px 0}.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}button{font:inherit}.answer,.btn{min-height:62px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--text);padding:16px 18px;cursor:pointer}.answer{text-align:left;font-size:22px;font-weight:700}.answer:hover:not(:disabled){border-color:var(--accent);background:#f8fbff}.answer.correct{background:var(--good-soft);border-color:var(--good)}.answer.wrong{background:var(--bad-soft);border-color:var(--bad);opacity:.86}.btn{font-weight:800}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.feedback{margin-top:12px;font-size:20px;min-height:52px;padding:16px 18px;border:1px solid #e5e7eb;border-radius:13px;background:#f9fafb;line-height:1.5}.feedback.good{background:#f0fdf4;border-color:#bbf7d0;color:#166534}.feedback.bad{background:#fef2f2;border-color:#fecaca;color:#991b1b}.hint{margin-top:10px;font-size:19px;padding:16px 18px;border-radius:13px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}.actions{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:14px}.hidden{display:none!important}.start-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.card{border:1px solid var(--line);border-radius:15px;padding:15px;background:#fafafa}.card h3{margin:0 0 8px}.card ul{margin:6px 0 0;padding-left:20px;line-height:1.7}label{display:block;font-weight:700;margin-bottom:6px}input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;font-size:20px}.note{font-size:16px;color:var(--muted);line-height:1.55}.reveal{margin-top:12px;font-size:20px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:14px;padding:12px}.reveal-title{font-size:13px;color:#1d4ed8;font-weight:800;margin-bottom:6px}.result{text-align:center}.big{font-size:34px;font-weight:900;margin:4px 0 8px}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.summary-grid div{padding:13px;border:1px solid var(--line);border-radius:13px;background:#fafafa}.teacher-note{margin-top:14px;font-size:17px;padding:13px;border:1px dashed #cbd5e1;border-radius:13px;background:#f8fafc;font-size:13px;color:#475569;line-height:1.6}svg{display:block;width:min(100%,900px);max-width:100%;height:auto;margin:auto}@media(max-width:700px){.question{font-size:22px}.answer{font-size:19px}.sub,.mission{font-size:17px}.answers,.start-grid,.summary-grid{grid-template-columns:1fr}.wrap{padding:12px}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><div class="eyebrow">중학교 3학년 과학 · 사람의 유전</div><h1>가계도 탐정</h1><div class="sub">가계도에서 유전자형을 단계적으로 추리해 봅시다.</div></div><div class="status"><div class="pill">진행 <span id="stepNow">0</span>/<span id="stepTotal">8</span></div><div class="pill">힌트 <span id="hintCount">0</span>회</div></div></header>
+<div class="progress"><div id="progressBar"></div></div>
+<section id="start" class="panel"><div class="start-grid"><div><div class="level">MISSION BRIEFING</div><h2>유전자형은 어떻게 추리할까?</h2><p class="mission">모둠원끼리 반드시 근거를 먼저 말한 뒤 답을 선택하세요.</p><div class="card"><h3>오늘 익힐 추론 순서</h3><ul><li>가계도 기호와 가족 관계 확인</li><li>우성·열성 판단</li><li><b>열성 형질 사람의 유전자형부터 aa로 확정</b></li><li>자녀의 유전자를 부모에게 역으로 추적</li><li>우성 형질 사람의 가능한 유전자형 판단</li><li>교과서형 귀지 가계도에 적용</li></ul></div></div><div><label for="team">모둠 이름</label><input id="team" maxlength="20" placeholder="예: 3모둠"><p class="note">이름은 현재 기기에서만 사용됩니다.</p><button id="startBtn" class="btn primary" type="button" style="width:100%;margin-top:8px">게임 시작</button><div class="teacher-note"><b>수업 조건</b><br>제시된 형질은 한 쌍의 대립유전자에 의해 결정되며 멘델의 유전 원리를 따른다고 가정합니다.</div></div></div></section>
+<section id="game" class="panel hidden"><div class="stage-head"><div><div id="level" class="level"></div><h2 id="title"></h2><div id="mission" class="mission"></div></div><button id="hintBtn" class="btn" type="button">힌트 보기</button></div><div id="visual" class="visual"></div><div id="question" class="question"></div><div id="answers" class="answers"></div><div id="hintBox" class="hint hidden"></div><div id="feedback" class="feedback">모둠원과 근거를 이야기한 뒤 답을 선택하세요.</div><div id="revealBox" class="reveal hidden"></div><div class="actions"><button id="restartMid" class="btn" type="button">처음부터</button><button id="nextBtn" class="btn primary hidden" type="button">다음 미션</button></div></section>
+<section id="result" class="panel hidden"><div class="result"><div class="level">CASE CLOSED</div><div class="big">유전자형 추리 완료!</div><p id="resultText"></p><div class="summary-grid"><div><b>열성</b><br><span class="note">표현형 → aa부터 확정</span></div><div><b>부모 추적</b><br><span class="note">자녀의 유전자를 부모에게 역추적</span></div><div><b>우성</b><br><span class="note">AA 또는 Aa 가능성 검토</span></div></div><button id="restartBtn" class="btn primary" type="button">다시 도전</button><div class="teacher-note"><b>마지막 발표 질문</b><br>“가계도에서 유전자형을 추론할 때 왜 열성 형질 사람부터 확인하는 것이 유리한가?”를 한 문장으로 설명해 보세요.</div></div></section>
+</div>
+<script>
+(() => {
+const $=s=>document.querySelector(s);const start=$('#start'),game=$('#game'),result=$('#result');const stepNow=$('#stepNow'),stepTotal=$('#stepTotal'),hintCountEl=$('#hintCount'),progressBar=$('#progressBar');const levelEl=$('#level'),titleEl=$('#title'),missionEl=$('#mission'),visualEl=$('#visual'),questionEl=$('#question'),answersEl=$('#answers'),feedbackEl=$('#feedback'),hintBox=$('#hintBox'),revealBox=$('#revealBox'),nextBtn=$('#nextBtn');let idx=0,hints=0,hintUsed=false,solved=false,team='우리 모둠';
+const basic=`<div class="legend">□ 남자 · ○ 여자</div><svg viewBox="0 0 560 240" role="img" aria-label="가계도 기본 구조"><line x1="190" y1="55" x2="370" y2="55" stroke="#374151" stroke-width="4"/><line x1="280" y1="55" x2="280" y2="120" stroke="#374151" stroke-width="4"/><line x1="170" y1="120" x2="390" y2="120" stroke="#374151" stroke-width="4"/><line x1="210" y1="120" x2="210" y2="170" stroke="#374151" stroke-width="4"/><line x1="350" y1="120" x2="350" y2="170" stroke="#374151" stroke-width="4"/><rect x="150" y="15" width="80" height="80" fill="white" stroke="#111827" stroke-width="4"/><circle cx="410" cy="55" r="40" fill="white" stroke="#111827" stroke-width="4"/><rect x="180" y="170" width="60" height="60" fill="white" stroke="#111827" stroke-width="4"/><circle cx="350" cy="200" r="30" fill="white" stroke="#111827" stroke-width="4"/><text x="190" y="12" text-anchor="middle" font-size="25">1</text><text x="410" y="12" text-anchor="middle" font-size="25">2</text><text x="210" y="238" text-anchor="middle" font-size="25">3</text><text x="350" y="238" text-anchor="middle" font-size="25">4</text></svg>`;
+const traitOnly=`<div class="legend">채움 = 형질 X · 비움 = 형질 Y</div><svg viewBox="0 0 560 260" role="img" aria-label="같은 형질의 부모와 다른 형질의 자녀가 있는 가계도"><line x1="190" y1="60" x2="370" y2="60" stroke="#374151" stroke-width="4"/><line x1="280" y1="60" x2="280" y2="130" stroke="#374151" stroke-width="4"/><line x1="170" y1="130" x2="390" y2="130" stroke="#374151" stroke-width="4"/><line x1="210" y1="130" x2="210" y2="180" stroke="#374151" stroke-width="4"/><line x1="350" y1="130" x2="350" y2="180" stroke="#374151" stroke-width="4"/><rect x="150" y="20" width="80" height="80" fill="#64748b" stroke="#111827" stroke-width="4"/><circle cx="410" cy="60" r="40" fill="#64748b" stroke="#111827" stroke-width="4"/><rect x="180" y="180" width="60" height="60" fill="#64748b" stroke="#111827" stroke-width="4"/><circle cx="350" cy="210" r="30" fill="white" stroke="#111827" stroke-width="4"/><text x="190" y="16" text-anchor="middle" font-size="25">아버지</text><text x="410" y="16" text-anchor="middle" font-size="25">어머니</text><text x="210" y="258" text-anchor="middle" font-size="25">첫째</text><text x="350" y="258" text-anchor="middle" font-size="25">둘째</text></svg>`;
+function inf(labels={}){const l={p1:'?',p2:'?',c1:'?',c2:'?',...labels};return `<div class="legend">채움 = 우성 형질 · 비움 = 열성 형질 / 우성 유전자 A, 열성 유전자 a</div><svg viewBox="0 0 560 300" role="img" aria-label="유전자형을 단계적으로 추론하는 가계도"><line x1="190" y1="60" x2="370" y2="60" stroke="#374151" stroke-width="4"/><line x1="280" y1="60" x2="280" y2="135" stroke="#374151" stroke-width="4"/><line x1="170" y1="135" x2="390" y2="135" stroke="#374151" stroke-width="4"/><line x1="210" y1="135" x2="210" y2="185" stroke="#374151" stroke-width="4"/><line x1="350" y1="135" x2="350" y2="185" stroke="#374151" stroke-width="4"/><rect x="150" y="20" width="80" height="80" fill="#64748b" stroke="#111827" stroke-width="4"/><circle cx="410" cy="60" r="40" fill="#64748b" stroke="#111827" stroke-width="4"/><rect x="180" y="185" width="60" height="60" fill="#64748b" stroke="#111827" stroke-width="4"/><circle cx="350" cy="215" r="30" fill="white" stroke="#111827" stroke-width="4"/><text x="190" y="16" text-anchor="middle" font-size="33">아버지</text><text x="410" y="16" text-anchor="middle" font-size="33">어머니</text><text x="210" y="262" text-anchor="middle" font-size="33">첫째</text><text x="350" y="262" text-anchor="middle" font-size="33">둘째</text><text x="190" y="120" text-anchor="middle" font-size="33" font-weight="700" fill="#2563eb">${l.p1}</text><text x="410" y="120" text-anchor="middle" font-size="33" font-weight="700" fill="#2563eb">${l.p2}</text><text x="210" y="292" text-anchor="middle" font-size="33" font-weight="700" fill="#2563eb">${l.c1}</text><text x="350" y="292" text-anchor="middle" font-size="33" font-weight="700" fill="#2563eb">${l.c2}</text></svg>`}
+function ear(labels={}){const l={n1:'?',n2:'?',n3:'?',n4:'?',n5:'?',n6:'?',n7:'?',...labels};return `<div class="legend">■/● 젖은 귀지 · □/○ 마른 귀지 / 젖은 귀지 우성 B, 마른 귀지 열성 b</div><svg viewBox="0 0 760 430" role="img" aria-label="귀지 가계도">
+  <g stroke="#374151" stroke-width="4.5" stroke-linecap="round" fill="none">
+    <!-- 1-2 부부 -->
+    <line x1="260" y1="80" x2="380" y2="80"/>
+    <!-- 1-2에서 자녀 세대로 -->
+    <line x1="320" y1="80" x2="320" y2="150"/>
+    <line x1="260" y1="150" x2="420" y2="150"/>
+    <line x1="260" y1="150" x2="260" y2="200"/>
+    <line x1="420" y1="150" x2="420" y2="200"/>
+
+    <!-- 5-3 부부 -->
+    <line x1="170" y1="230" x2="230" y2="230"/>
+    <!-- 5-3의 자녀 세대로 -->
+    <line x1="200" y1="230" x2="200" y2="295"/>
+    <line x1="160" y1="295" x2="240" y2="295"/>
+    <line x1="160" y1="295" x2="160" y2="330"/>
+    <line x1="240" y1="295" x2="240" y2="330"/>
+  </g>
+
+  <!-- 1, 2 -->
+  <rect x="180" y="40" width="80" height="80" fill="#64748b" stroke="#111827" stroke-width="4.5"/>
+  <circle cx="420" cy="80" r="40" fill="#64748b" stroke="#111827" stroke-width="4.5"/>
+
+  <!-- 5, 3, 4 -->
+  <circle cx="140" cy="230" r="30" fill="white" stroke="#111827" stroke-width="4.5"/>
+  <rect x="230" y="200" width="60" height="60" fill="#64748b" stroke="#111827" stroke-width="4.5"/>
+  <circle cx="420" cy="230" r="30" fill="white" stroke="#111827" stroke-width="4.5"/>
+
+  <!-- 6, 7 -->
+  <rect x="135" y="330" width="50" height="50" fill="white" stroke="#111827" stroke-width="4.5"/>
+  <circle cx="240" cy="355" r="25" fill="#64748b" stroke="#111827" stroke-width="4.5"/>
+
+  <!-- 번호 -->
+  <g fill="#111827" font-size="30" font-weight="700" text-anchor="middle">
+    <text x="220" y="28">1</text>
+    <text x="420" y="28">2</text>
+    <text x="140" y="184">5</text>
+    <text x="260" y="184">3</text>
+    <text x="420" y="184">4</text>
+    <text x="160" y="405">6</text>
+    <text x="240" y="405">7</text>
+  </g>
+
+  <!-- 유전자형 -->
+  <g fill="#2563eb" font-size="28" font-weight="700" text-anchor="middle">
+    <text x="220" y="150">${l.n1}</text>
+    <text x="420" y="150">${l.n2}</text>
+    <text x="140" y="278">${l.n5}</text>
+    <text x="260" y="278">${l.n3}</text>
+    <text x="420" y="278">${l.n4}</text>
+    <text x="160" y="322">${l.n6}</text>
+    <text x="240" y="322">${l.n7}</text>
+  </g>
+</svg>`}
+
+const stages=[
+{level:'LEVEL 1',title:'가계도 기호를 읽어라',mission:'가계도의 기본 기호부터 확인합니다.',visual:basic,q:'가계도에서 원(○)은 무엇을 뜻할까요?',opts:['남자','여자','자녀','열성 형질'],a:1,hint:'남자와 여자는 서로 다른 도형으로 나타냅니다.',good:'원(○)은 여자, 사각형(□)은 남자를 뜻합니다.',bad:'가계도의 기본 성별 기호를 다시 생각해 보세요.',reveal:'가계도 해석은 먼저 <b>성별과 가족 관계</b>를 정확히 읽는 것에서 시작합니다.'},
+{level:'LEVEL 2',title:'가족 관계를 찾아라',mission:'선의 연결 방법으로 관계를 해석합니다.',visual:basic,q:'1번과 2번의 관계로 알맞은 것은?',opts:['형제자매','부부','부모와 자녀','사촌'],a:1,hint:'가로선으로 직접 연결된 두 사람을 보세요.',good:'가로선으로 직접 연결된 두 사람은 부부를 뜻합니다.',bad:'가로선과 세로선의 의미를 다시 살펴보세요.',reveal:'부부의 가로선에서 아래로 내려가는 세로선은 <b>자녀 세대</b>로 이어집니다.'},
+{level:'LEVEL 3',title:'우성과 열성을 판단하라',mission:'같은 형질의 부모와 다른 형질의 자녀를 비교합니다.',visual:traitOnly,q:'이 형질이 멘델의 유전 원리를 따른다고 할 때, 채워진 형질 X와 비어 있는 형질 Y 중 우성은?',opts:['형질 X','형질 Y','둘 다 우성','판단할 수 없음'],a:0,hint:'같은 형질의 부모에게서 부모와 다른 형질의 자녀가 태어났습니다.',good:'형질 X 부모 사이에서 형질 Y 자녀가 태어났으므로 X가 우성, Y가 열성입니다.',bad:'부모 둘과 둘째 자녀의 형질을 비교해 보세요.',reveal:'핵심: <b>같은 형질의 부모 사이에서 다른 형질의 자녀가 태어나면, 부모 형질이 우성·자녀 형질이 열성</b>입니다.'},
+{level:'LEVEL 4',title:'열성 유전자형부터 확정하라',mission:'이제부터 유전자형을 단계적으로 추론합니다.',visual:inf(),q:'열성 형질인 둘째의 유전자형은 무엇일까요?',opts:['AA','Aa','aa','AA 또는 Aa'],a:2,hint:'열성 형질은 열성 유전자를 두 개 가져야 표현됩니다.',good:'열성 형질인 둘째의 유전자형은 aa입니다.',bad:'열성 형질이 표현되기 위한 대립유전자 조합을 생각해 보세요.',reveal:'첫 단계는 항상 <b>열성 형질 사람을 찾아 aa로 확정</b>하는 것입니다.',after:inf({c2:'aa'})},
+{level:'LEVEL 5',title:'자녀의 a를 부모에게 역추적하라',mission:'열성 자녀의 유전자는 부모에게서 하나씩 옵니다.',visual:inf({c2:'aa'}),q:'둘째(aa)는 부모에게서 어떤 유전자를 하나씩 받았을까요?',opts:['A와 A','A와 a','a와 a','알 수 없음'],a:2,hint:'자녀는 아버지와 어머니에게서 대립유전자를 하나씩 받습니다.',good:'둘째가 aa이므로 아버지에게서 a 하나, 어머니에게서 a 하나를 받았습니다.',bad:'aa를 구성하는 두 유전자가 어디서 왔는지 생각해 보세요.',reveal:'따라서 두 부모는 모두 최소한 <b>a를 하나씩 가지고 있어야</b> 합니다.'},
+{level:'LEVEL 6',title:'우성 부모의 유전자형을 결정하라',mission:'표현형과 자녀 정보를 함께 이용합니다.',visual:inf({c2:'aa'}),q:'두 부모는 우성 형질이면서 각각 a를 하나씩 가지고 있습니다. 두 부모의 유전자형은?',opts:['AA와 AA','AA와 Aa','Aa와 Aa','aa와 aa'],a:2,hint:'우성 형질이므로 aa는 아니고, 열성 자녀에게 a를 주었으므로 A만 가진 것도 아닙니다.',good:'두 부모는 모두 우성 형질이면서 a를 하나씩 가지고 있으므로 Aa입니다.',bad:'우성 표현형이라는 정보와 a를 가지고 있다는 정보를 동시에 사용하세요.',reveal:'추론 결과: <b>Aa × Aa → aa 자녀 가능</b>',after:inf({p1:'Aa',p2:'Aa',c2:'aa'})},
+{level:'LEVEL 7',title:'우성 형질은 항상 Aa일까?',mission:'확정 가능한 것과 확정할 수 없는 것을 구분합니다.',visual:inf({p1:'Aa',p2:'Aa',c2:'aa'}),q:'우성 형질인 첫째의 유전자형은 이 가계도만으로 어떻게 판단하는 것이 가장 정확할까요?',opts:['반드시 AA','반드시 Aa','AA 또는 Aa','반드시 aa'],a:2,hint:'Aa × Aa에서 우성 표현형을 나타낼 수 있는 유전자형을 생각해 보세요.',good:'첫째는 우성 형질이므로 AA 또는 Aa일 수 있습니다. 이 가계도만으로 하나로 확정할 수 없습니다.',bad:'우성 표현형을 나타낼 수 있는 유전자형이 한 가지뿐인지 생각해 보세요.',reveal:'중요: <b>우성 표현형 = 항상 하나의 유전자형으로 확정되는 것은 아님</b>.',after:inf({p1:'Aa',p2:'Aa',c1:'AA/Aa',c2:'aa'})},
+{level:'FINAL CASE',title:'교과서형 귀지 가계도',mission:'앞에서 익힌 추론 순서를 실제 가계도에 적용합니다.',visual:ear(),q:'젖은 귀지인 1번과 2번 사이에서 마른 귀지인 4번이 태어났습니다. 1번과 2번의 유전자형은?',opts:['BB와 BB','BB와 Bb','Bb와 Bb','bb와 bb'],a:2,hint:'먼저 마른 귀지 4번의 유전자형을 확정한 뒤, b를 부모에게 역추적하세요.',good:'마른 귀지는 열성이므로 4번은 bb입니다. 따라서 1번과 2번은 각각 b를 하나씩 가지고 있고, 젖은 귀지이므로 둘 다 Bb입니다.',bad:'4번의 유전자형부터 먼저 확정해 보세요.',reveal:'적용 순서: <b>4번 bb 확정 → b를 부모에게 역추적 → 1번 Bb, 2번 Bb</b>',after:ear({n1:'Bb',n2:'Bb',n4:'bb'})}
+];
+stepTotal.textContent=stages.length;function update(){stepNow.textContent=Math.min(idx+1,stages.length);hintCountEl.textContent=hints;progressBar.style.width=((idx+1)/stages.length*100)+'%'}function render(){solved=false;hintUsed=false;const s=stages[idx];levelEl.textContent=s.level;titleEl.textContent=s.title;missionEl.textContent=s.mission;visualEl.innerHTML=s.visual;questionEl.textContent=s.q;answersEl.innerHTML='';hintBox.classList.add('hidden');hintBox.textContent='';revealBox.classList.add('hidden');revealBox.innerHTML='';feedbackEl.className='feedback';feedbackEl.textContent='모둠원과 근거를 이야기한 뒤 답을 선택하세요.';nextBtn.classList.add('hidden');s.opts.forEach((o,i)=>{const b=document.createElement('button');b.type='button';b.className='answer';b.textContent=o;b.addEventListener('click',()=>choose(i,b));answersEl.appendChild(b)});update()}function choose(i,btn){if(solved)return;const s=stages[idx];if(i===s.a){solved=true;btn.classList.add('correct');[...answersEl.children].forEach(x=>x.disabled=true);feedbackEl.className='feedback good';feedbackEl.textContent=s.good;revealBox.classList.remove('hidden');revealBox.innerHTML='<div class="reveal-title">추론 정리</div>'+s.reveal;if(s.after)visualEl.innerHTML=s.after;nextBtn.textContent=idx===stages.length-1?'사건 해결 완료':'다음 미션';nextBtn.classList.remove('hidden')}else{btn.disabled=true;btn.classList.add('wrong');feedbackEl.className='feedback bad';feedbackEl.textContent=s.bad}}
+$('#hintBtn').addEventListener('click',()=>{const s=stages[idx];if(hintBox.classList.contains('hidden')){if(!hintUsed){hints++;hintUsed=true;update()}hintBox.textContent='단서: '+s.hint;hintBox.classList.remove('hidden')}else hintBox.classList.add('hidden')});$('#startBtn').addEventListener('click',()=>{team=$('#team').value.trim()||'우리 모둠';idx=0;hints=0;start.classList.add('hidden');result.classList.add('hidden');game.classList.remove('hidden');render()});nextBtn.addEventListener('click',()=>{if(idx<stages.length-1){idx++;render()}else{game.classList.add('hidden');result.classList.remove('hidden');$('#resultText').textContent=team+'은(는) 열성 형질부터 시작해 부모와 자녀의 유전자형을 단계적으로 추론하는 방법을 모두 해결했습니다.';progressBar.style.width='100%';stepNow.textContent=stages.length}});function restart(){idx=0;hints=0;game.classList.add('hidden');result.classList.add('hidden');start.classList.remove('hidden');stepNow.textContent='0';hintCountEl.textContent='0';progressBar.style.width='0%'}$('#restartBtn').addEventListener('click',restart);$('#restartMid').addEventListener('click',restart);progressBar.style.width='0%';
+})();
+</script>
+</body>
+</html>
